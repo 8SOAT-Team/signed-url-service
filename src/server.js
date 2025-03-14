@@ -1,5 +1,4 @@
 const express = require('express');
-const dotenv = require('./config/dotenv');
 const signedUrlRoutes = require('./routes/signedUrlRoutes');
 
 const app = express();
