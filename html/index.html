@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Upload de Vídeos</title>
+        <style>
+            body {
+                background-color: #f5f7fa;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+
+            .wrapper {
+                display: flex;
+                justify-content: center;
+                padding: 3rem 1rem;
+                min-height: 100vh;
+                box-sizing: border-box;
+            }
+
+            .container {
+                background: white;
+                padding: 2rem;
+                border-radius: 16px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                width: 100%;
+                max-width: 500px;
+                text-align: center;
+            }
+
+            h2 {
+                margin-bottom: 1.5rem;
+                font-size: 24px;
+            }
+
+            input[type="file"] {
+                display: none;
+            }
+
+            .custom-file-upload {
+                border: 2px dashed #0077ff;
+                border-radius: 12px;
+                padding: 1.5rem;
+                cursor: pointer;
+                color: #0077ff;
+                font-weight: bold;
+                transition: background 0.2s;
+                display: block;
+            }
+
+            .custom-file-upload:hover {
+                background-color: #f0f8ff;
+            }
+
+            ul {
+                list-style: none;
+                padding: 0;
+                margin-top: 1.5rem;
+                text-align: left;
+            }
+
+            li {
+                margin: 8px 0;
+                font-size: 14px;
+            }
+
+            progress {
+                width: 100%;
+                margin-top: 4px;
+                height: 14px;
+            }
+
+            button {
+                margin-top: 2rem;
+                padding: 10px 20px;
+                background-color: #0077ff;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            button:hover {
+                background-color: #005ec2;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="container">
+                <h2>Upload de Vídeos</h2>
+
+                <label for="videoInput" class="custom-file-upload">
+                    Selecionar Vídeos
+                    <input
+                        type="file"
+                        id="videoInput"
+                        accept="video/*"
+                        multiple
+                    />
+                </label>
+
+                <ul id="fileList"></ul>
+
+                <button onclick="enviarVideos()">Enviar</button>
+            </div>
+        </div>
+
+        <script>
+            const input = document.getElementById("videoInput");
+            const fileList = document.getElementById("fileList");
+            const MAX_MB = 500;
+
+            input.addEventListener("change", () => {
+                fileList.innerHTML = "";
+                Array.from(input.files).forEach((file, index) => {
+                    const li = document.createElement("li");
+                    const sizeMB = file.size / (1024 * 1024);
+
+                    if (sizeMB > MAX_MB) {
+                        li.innerHTML = `<strong style="color:red;">${file.name}</strong> ultrapassa o limite de ${MAX_MB}MB`;
+                    } else {
+                        li.innerHTML = `
+            <strong>${file.name}</strong> (${sizeMB.toFixed(2)} MB)
+            <progress id="progress-${index}" max="100" value="0"></progress>
+          `;
+                    }
+
+                    fileList.appendChild(li);
+                });
+            });
+
+            async function gerarUrlAutoAssinada(fileName, fileType) {
+                const response = await fetch(
+                    "http://localhost:3000/api/signed-url",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            bucketName: "fiappostech-signed-url-service",
+                            key: "uploads/" + encodeURIComponent(fileName),
+                            expiresIn: 3600,
+                            fileType: fileType,
+                        }),
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "*/*",
+                        },
+                    }
+                );
+                const { url } = await response.json();
+                return url;
+            }
+
+            async function enviarVideos() {
+                const files = Array.from(input.files);
+                if (!files.length) return alert("Selecione ao menos um vídeo.");
+                for (let index = 0; index < files.length; index++) {
+                    const file = files[index];
+
+                    const url = await gerarUrlAutoAssinada(
+                        file.name,
+                        file.type
+                    );
+
+                    await fetch(url, {
+                        method: "PUT",
+                        body: file,
+                        headers: { "Content-Type": file.type },
+                    }).then((response) => {
+                        if (response.ok) {
+                            document.getElementById(
+                                `progress-${index}`
+                            ).value = 100;
+                        } else {
+                            alert(`Falha no upload de ${file.name}`);
+                        }
+                    });
+
+                    // Animação fake de progresso
+                    let p = document.getElementById(`progress-${index}`);
+                    let val = 0;
+                    const interval = setInterval(() => {
+                        if (val >= 100) {
+                            clearInterval(interval);
+                            if ((index + 1) == files.length) {
+                              alert("Uploads concluídos!");
+                            }
+                        } else {
+                            val += 5;
+                            p.value = val;
+                        }
+                    }, 30);
+                }
+            }
+        </script>
+    </body>
+</html>

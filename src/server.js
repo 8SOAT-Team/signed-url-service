@@ -4,11 +4,13 @@ const sequelize = require("./config/database");
     await sequelize.sync();
 })();
 
-const express = require("express");
 const signedUrlRoutes = require("./routes/signedUrlRoutes");
 const startProcessingRoutes = require("./routes/startProcessingRoutes");
 
+const cors = require("cors");
+const express = require("express");
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use("/api", signedUrlRoutes);
 app.use("/api", startProcessingRoutes);
