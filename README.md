@@ -53,8 +53,8 @@ Gera uma URL assinada para upload de arquivos no S3.
 - **Body (JSON):**
 ```json
 {
-  "fileName": "exemplo.pdf",
-  "fileType": "application/pdf"
+  "fileName": "exemplo.mp4",
+  "fileType": "video/mp4"
 }
 ```
 
@@ -76,7 +76,8 @@ Dispara o início do processamento enviando uma mensagem para uma fila SQS.
 - **Body (JSON):**
 ```json
 {
-  "id": "1234567890abcdef"
+  "id": "1234567890abcdef",
+  "fileName": "exemplo.mp4"
 }
 ```
 
