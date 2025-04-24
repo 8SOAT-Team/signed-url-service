@@ -1,18 +1,20 @@
 const { v4: uuidv4 } = require("uuid");
 const s3 = require("../config/s3Client");
 const repository = require("../repositories/signedUrlRepository");
+require("dotenv").config();
 
-async function generateSignedUrl(bucketName, key, expiresIn, fileType) {
+async function generateSignedUrl(fileName, fileType) {
+    const recordId = uuidv4();
     const params = {
-        Bucket: bucketName,
-        Key: key,
-        Expires: expiresIn,
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: recordId + "/" + fileName,
+        Expires: 3600,
         ContentType: fileType,
     };
 
     try {
         const url = await s3.getSignedUrl("putObject", params);
-        const signedUrl = { id: uuidv4(), url, createdAt: new Date() };
+        const signedUrl = { id: recordId, url: url, createdAt: new Date() };
         await repository.saveSignedUrl(signedUrl);
         return signedUrl;
     } catch (error) {

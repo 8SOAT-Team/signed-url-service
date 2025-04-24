@@ -1,12 +1,21 @@
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
+require("dotenv").config();
 
-async function requestProcessing(region, queueUrl, signedUrl) {
-    const sqsClient = new SQSClient({ region: region });
+async function requestProcessing(id, fileName) {
+    const sqsClient = new SQSClient({
+        region: process.env.AWS_REGION,
+        credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        },
+    });
     const params = {
-        QueueUrl: queueUrl,
+        QueueUrl: process.env.SQS_URL,
         MessageBody: JSON.stringify({
-            id: signedUrl,
+            ProcessId: id,
+            VideoName: fileName,
         }),
+        MessageGroupId: id
     };
 
     try {
@@ -15,9 +24,8 @@ async function requestProcessing(region, queueUrl, signedUrl) {
         return response;
     } catch (error) {
         throw new Error(
-            "Erro ao gerar postar mensagem na fila: " + error.message
+            "Erro ao postar mensagem na fila: " + error.message
         );
     }
 }
-
-module.exports = { requestProcessing };
+module.exports = requestProcessing;
