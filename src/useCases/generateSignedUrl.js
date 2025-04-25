@@ -14,7 +14,7 @@ async function generateSignedUrl(fileName, fileType) {
 
     try {
         const url = await s3.getSignedUrl("putObject", params);
-        const signedUrl = { id: recordId, url: url, createdAt: new Date() };
+        const signedUrl = { id: recordId, createdAt: new Date(), fileName, fileType, url };
         await repository.saveSignedUrl(signedUrl);
         return signedUrl;
     } catch (error) {

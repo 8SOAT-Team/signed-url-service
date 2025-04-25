@@ -1,7 +1,11 @@
 const sequelize = require("./config/database");
 (async () => {
     await sequelize.authenticate();
-    await sequelize.sync();
+    try{
+        await sequelize.sync({ alter: true });
+    }catch(error){
+        await sequelize.sync({ force: true });
+    }    
 })();
 
 const signedUrlRoutes = require("./routes/signedUrlRoutes");
