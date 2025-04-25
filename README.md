@@ -1,85 +1,89 @@
+# 📁 Signed URL Service
 
-# Serviço de URLs Assinadas para Uploads e Processamento
+Este serviço é responsável por gerar URLs assinadas para upload seguro de arquivos no Amazon S3 e iniciar o processo de processamento de vídeos de forma assíncrona. Ele faz parte de um projeto de pós-graduação que utiliza uma arquitetura de microsserviços para processamento de vídeos.
 
-Este repositório contém um microserviço desenvolvido em Node.js utilizando Express para disponibilizar dois endpoints REST. O serviço permite a geração de URLs assinadas para upload de arquivos em um bucket da AWS S3 e o disparo de uma mensagem para a AWS SQS para início de um processamento assíncrono.
+## 🚀 Funcionalidades
 
-## Como Rodar o Projeto Localmente
+- **Geração de URL assinada:** Fornece uma URL temporária para upload de arquivos diretamente no S3.
+- **Início do processamento:** Após o upload, envia uma mensagem para uma fila SQS indicando que o arquivo está pronto para ser processado.
 
-### Pré-requisitos
+## 🛠️ Tecnologias Utilizadas
 
-- Git
-- Node.js (versão recomendada: 18+)
-- Conta e credenciais configuradas da AWS (com acesso ao S3 e SQS)
+- **Node.js 18**
+- **Express**
+- **Sequelize (ORM)**
+- **PostgreSQL**
+- **AWS SDK (S3 e SQS)**
+- **Docker & Docker Compose**
 
-### Passos
+## ⚙️ Configuração de Variáveis com `.env`
 
-1. Clone o repositório:
+Crie um arquivo `.env` na raiz do projeto com base no `.env-example`:
 
-    ```bash
-    git clone https://github.com/8SOAT-Team/signed-url-service
-    cd signed-url-service
-    ```
+```env
+PORT=3000
+DB_HOST=db
+DB_PORT=5432
+DB_NAME=signedurls
+DB_USER=user
+DB_PWD=password
+AWS_ACCESS_KEY_ID=your-access-key-id
+AWS_SECRET_ACCESS_KEY=your-secret-access-key
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=your-s3-bucket-name
+SQS_URL=https://sqs.us-east-1.amazonaws.com/000000000000/your-queue-name
+```
 
-2. Crie o arquivo `.env` com base no `.env-example`:
+⚠️ **Importante:** Não versionar o `.env`. Use o `.env-example` como referência para outros devs.
 
-    ```bash
-    cp .env-example .env
-    ```
+## 📦 Instalação e Execução com Docker Compose
 
-3. Instale as dependências:
+### 1. Clone o repositório
 
-    ```bash
-    npm install
-    ```
+```bash
+git clone https://github.com/8SOAT-Team/signed-url-service.git
+cd signed-url-service
+```
 
-4. Inicie a aplicação:
+### 2. Crie e edite o `.env`
 
-    ```bash
-    npm start
-    ```
+```bash
+cp .env-example .env
+# edite o arquivo com suas credenciais
+```
 
-## Endpoints
+### 3. Execute a aplicação
 
-### 1. `POST /api/signed-url`
+```bash
+docker-compose up --build
+```
 
-Gera uma URL assinada para upload de arquivos no S3.
+A aplicação ficará disponível em `http://localhost:3000`.
 
-#### Body (JSON):
+## 📚 Endpoints da API
+
+### 1. Gerar URL Assinada
+
+- **Endpoint:** `POST /api/signed-url`
+- **Corpo da requisição:**
 
 ```json
 {
-    "fileName": "exemplo.mp4",
-    "fileType": "video/mp4"
+  "fileName": "exemplo.mp4",
+  "fileType": "video/mp4"
 }
 ```
 
-#### Resposta (JSON):
+### 2. Iniciar Processamento
+
+- **Endpoint:** `POST /api/start-processing`
+- **Corpo da requisição:**
 
 ```json
 {
-    "id": "1234567890abcdef",
-    "url": "https://s3.amazonaws.com/seu-bucket/uploads/exemplo.pdf?AWSAccessKeyId=...",
-    "fileName": "exemplo.mp4",
-    "fileType": "video/mp4",
-    "createdAt": "2025-04-23T15:00:00.000Z"
+  "id": "uuid-do-arquivo"
 }
 ```
-
-### 2. `POST /api/start-processing`
-
-Dispara o início do processamento enviando uma mensagem para uma fila SQS.
-
-#### Body (JSON):
-
-```json
-{
-    "id": "1234567890abcdef"
-}
-```
-
-#### Referência ao Repositório do Microserviço de Processamento:
-
-[Repositório de Processamento de Vídeo](https://github.com/8SOAT-Team/media-video-screenshot-processor)
 
 ## Diagrama da Arquitetura de Infraestrutura
 
@@ -104,10 +108,10 @@ signed-url-service
 └── README.md
 ```
 
-## Autores
+## 👥 Contribuidores
 
-- André Bessa - RM357159
-- Fernanda Beato - RM357346
-- Felipe Bergmann - RM357042
-- Darlei Randel - RM356751
-- Victor Oliver - RM357451
+- André Bessa – RM 357159  
+- Fernanda Beato – RM 357346  
+- Felipe Bergmann – RM 357042  
+- Darlei Randel – RM 356751  
+- Victor Oliver – RM 357451

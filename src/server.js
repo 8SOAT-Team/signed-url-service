@@ -1,23 +1,20 @@
 const sequelize = require("./config/database");
 (async () => {
     await sequelize.authenticate();
-    try{
+    try {
         await sequelize.sync({ alter: true });
-    }catch(error){
+    } catch (error) {
         await sequelize.sync({ force: true });
-    }    
+    }
 })();
 
-const signedUrlRoutes = require("./routes/signedUrlRoutes");
-const startProcessingRoutes = require("./routes/startProcessingRoutes");
-
-const cors = require("cors");
 const express = require("express");
 const app = express();
-app.use(cors());
+app.use(require("helmet")());
+app.use(require("cors")());
 app.use(express.json());
-app.use("/api", signedUrlRoutes);
-app.use("/api", startProcessingRoutes);
+app.use("/api", require("./routes/signedUrlRoutes"));
+app.use("/api", require("./routes/startProcessingRoutes"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
