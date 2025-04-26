@@ -1,29 +1,29 @@
 const { v4: uuidv4 } = require("uuid");
-const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
+const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
 require("dotenv").config();
 
 async function requestProcessing(id, fileName) {
     try {
         const params = {
-            TopicArn: process.env.AWS_SNS_ARN,
-            Message: JSON.stringify({
+            QueueUrl: process.env.SQS_URL,
+            MessageBody: JSON.stringify({
                 ProcessId: id,
-                VideoName: fileName,
+                VideoName: fileName, 
             }),
-            MessageGroupId: uuidv4(),
+            MessageGroupId: uuidv4(), 
         };
-        const command = new PublishCommand(params);
+        const command = new SendMessageCommand(params);
 
-        const snsClient = new SNSClient({
+        const sqsClient = new SQSClient({
             region: process.env.AWS_REGION,
             credentials: {
                 accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, 
             },
-        });
-        return await snsClient.send(command);
+        }); 
+        return await sqsClient.send(command);
     } catch (error) {
-        throw new Error("Erro ao publicar mensagem no SNS: " + error.message);
+        throw new Error("Erro ao publicar mensagem no SQS: " + error.message);
     }
 }
 

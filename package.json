@@ -4,6 +4,7 @@
   "main": "src/server.js",
   "dependencies": {
     "@aws-sdk/client-sns": "^3.796.0",
+    "@aws-sdk/client-sqs": "^3.797.0",
     "@sequelize/postgres": "^7.0.0-alpha.46",
     "aws-sdk": "^2.1242.0",
     "cors": "^2.8.5",
